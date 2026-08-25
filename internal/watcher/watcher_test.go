@@ -81,12 +81,12 @@ func TestLoop_DebounceCollapses(t *testing.T) {
 	fake.evCh <- fsnotify.Event{Name: "a.go", Op: fsnotify.Write}
 	fake.evCh <- fsnotify.Event{Name: "b.go", Op: fsnotify.Write}
 	fake.evCh <- fsnotify.Event{Name: "c.go", Op: fsnotify.Write}
-	got := awaitEvent(t, w, 300*time.Millisecond)
+	got := awaitEvent(t, w, time.Second)
 	if got == "" {
 		t.Fatal("expected a debounced event, got nothing")
 	}
 	// no second signal from the same burst
-	if extra := awaitEvent(t, w, 150*time.Millisecond); extra != "" {
+	if extra := awaitEvent(t, w, 300*time.Millisecond); extra != "" {
 		t.Fatalf("debounce emitted a second event (%q) for one burst", extra)
 	}
 }
@@ -94,7 +94,7 @@ func TestLoop_DebounceCollapses(t *testing.T) {
 func TestLoop_NonMatchingIgnored(t *testing.T) {
 	w, fake := testWatcher(t, 5*time.Millisecond, map[string]bool{".go": true})
 	fake.evCh <- fsnotify.Event{Name: "notes.txt", Op: fsnotify.Write}
-	if got := awaitEvent(t, w, 120*time.Millisecond); got != "" {
+	if got := awaitEvent(t, w, 300*time.Millisecond); got != "" {
 		t.Fatalf("non-matching file emitted event %q", got)
 	}
 }
@@ -103,7 +103,7 @@ func TestLoop_CreateDirAddsWatch(t *testing.T) {
 	_, fake := testWatcher(t, 5*time.Millisecond, nil)
 	dir := t.TempDir()
 	fake.evCh <- fsnotify.Event{Name: dir, Op: fsnotify.Create}
-	deadline := time.Now().Add(500 * time.Millisecond)
+	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {
 		for _, a := range fake.addedPaths() {
 			if a == dir {

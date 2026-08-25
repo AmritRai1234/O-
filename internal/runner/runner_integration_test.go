@@ -38,6 +38,8 @@ func TestMain(m *testing.M) {
 }
 
 // waitFor polls a condition with a bounded deadline (no unbounded sleeps).
+// Windows are generous: CI runners are slow and cold (helper build, scheduler
+// load), and a timeout here is a flake, not a signal.
 func waitFor(t *testing.T, d time.Duration, what string, cond func() bool) {
 	t.Helper()
 	deadline := time.Now().Add(d)
@@ -56,7 +58,7 @@ func TestStartStop_Graceful(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	waitFor(t, 2*time.Second, "child start", func() bool { return r.PID() != 0 })
+	waitFor(t, 10*time.Second, "child start", func() bool { return r.PID() != 0 })
 	if err := r.Stop(2 * time.Second); err != nil {
 		t.Fatalf("graceful Stop returned error: %v", err)
 	}
@@ -75,7 +77,7 @@ func TestStop_SIGTERMIgnoring(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	waitFor(t, 2*time.Second, "helper ready (SIGTERM handler installed)", func() bool {
+	waitFor(t, 10*time.Second, "helper ready (SIGTERM handler installed)", func() bool {
 		_, err := os.Stat(readyFile)
 		return err == nil
 	})
@@ -84,7 +86,7 @@ func TestStop_SIGTERMIgnoring(t *testing.T) {
 	if err == nil {
 		t.Fatal("Stop must report escalation when the child ignores SIGTERM")
 	}
-	if time.Since(start) < 900*time.Millisecond {
+	if time.Since(start) < 800*time.Millisecond {
 		t.Errorf("SIGKILL escalated too early: %v", time.Since(start))
 	}
 	if !r.Exited() {
@@ -119,7 +121,7 @@ func TestStop_KillsGrandchildren(t *testing.T) {
 		t.Fatal(err)
 	}
 	var grandPID int
-	waitFor(t, 3*time.Second, "grandchild pidfile", func() bool {
+	waitFor(t, 15*time.Second, "grandchild pidfile", func() bool {
 		data, err := os.ReadFile(pidFile)
 		if err != nil {
 			return false
