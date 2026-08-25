@@ -2,7 +2,10 @@ BINARY := bin/o-
 VERSION := v0.1.0
 COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 
-.PHONY: build test vet coverage clean install
+bench:
+	python3 benchmarks/bench.py
+
+.PHONY: build test vet coverage bench clean install
 
 build:
 	go build -ldflags "-X github.com/amritrai/o-/internal/version.Version=$(VERSION) -X github.com/amritrai/o-/internal/version.Commit=$(COMMIT)" -o $(BINARY) .

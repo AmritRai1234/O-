@@ -1,0 +1,21 @@
+{
+  "ts": "2026-08-25T17:59:43.669180+00:00",
+  "o_version": "o- version v0.1.0-dev",
+  "bun_version": "1.3.14",
+  "metrics": {
+    "go_scaffold_s": 0.006,
+    "go_cold_start_s": 5.887,
+    "go_hot_reload_s": 0.357,
+    "go_build_s": 0.2414162920031231,
+    "go_build_size_bytes": 5529784,
+    "go_test_s": 0.28251700699911453,
+    "go_test_passed": false,
+    "bun_scaffold_s": 1.045,
+    "bun_cold_start_s": 0.053,
+    "bun_hot_reload_s": 0.003,
+    "bun_build_s": 0.27032775100087747,
+    "bun_build_size_bytes": 94582912,
+    "bun_test_s": 0.0112861280067591,
+    "bun_test_passed": false
+  }
+}
