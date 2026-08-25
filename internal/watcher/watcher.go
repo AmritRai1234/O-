@@ -19,11 +19,30 @@ const (
 	pollInterval = 500 * time.Millisecond
 )
 
+// source is the fsnotify surface the watcher loop consumes. fsnotify.Watcher
+// satisfies it via fsNotifySource (fsnotify v1 exposes Events/Errors as fields,
+// so the adapter turns them into methods); tests inject a fake (Architect
+// decision: no flaky sleeps to test the debounce loop — a fake source instead).
+type source interface {
+	Events() chan fsnotify.Event
+	Errors() chan error
+	Add(path string) error
+	Close() error
+}
+
+// fsNotifySource adapts *fsnotify.Watcher to source.
+type fsNotifySource struct {
+	*fsnotify.Watcher
+}
+
+func (s fsNotifySource) Events() chan fsnotify.Event { return s.Watcher.Events }
+func (s fsNotifySource) Errors() chan error          { return s.Watcher.Errors }
+
 // Watcher emits debounced change signals for a project tree. Uses fsnotify on
 // Linux; transparently falls back to polling when the inotify watch limit would
 // be exceeded (Performance condition: never fail silently at ~8192 dirs).
 type Watcher struct {
-	fs       *fsnotify.Watcher
+	src      source
 	events   chan string
 	debounce time.Duration
 	excludes []string
@@ -55,7 +74,7 @@ func New(root string, watchPatterns, extraExcludes []string, debounce time.Durat
 	if err != nil {
 		return nil, err
 	}
-	w.fs = fw
+	w.src = fsNotifySource{fw}
 	if err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -83,8 +102,8 @@ func (w *Watcher) Events() <-chan string {
 // Close stops watching.
 func (w *Watcher) Close() error {
 	close(w.done)
-	if w.fs != nil {
-		return w.fs.Close()
+	if w.src != nil {
+		return w.src.Close()
 	}
 	return nil
 }
@@ -113,7 +132,13 @@ func (w *Watcher) wouldExceedInotify(root string) bool {
 }
 
 func readInotifyLimit() int {
-	data, err := os.ReadFile("/proc/sys/fs/inotify/max_user_watches")
+	return readInotifyLimitFrom("/proc/sys/fs/inotify/max_user_watches")
+}
+
+// readInotifyLimitFrom parses a max_user_watches file. Path is a parameter so
+// tests can feed a temp file instead of the host kernel setting.
+func readInotifyLimitFrom(path string) int {
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return 0 // not Linux or unreadable: let fsnotify try
 	}
@@ -130,13 +155,13 @@ func (w *Watcher) loop() {
 		select {
 		case <-w.done:
 			return
-		case ev, ok := <-w.fs.Events:
+		case ev, ok := <-w.src.Events():
 			if !ok {
 				return
 			}
 			if ev.Op&fsnotify.Create != 0 {
 				if info, err := os.Stat(ev.Name); err == nil && info.IsDir() && !w.excluded(ev.Name) {
-					_ = w.fs.Add(ev.Name)
+					_ = w.src.Add(ev.Name)
 				}
 			}
 			if !w.matches(ev.Name) {
@@ -153,7 +178,7 @@ func (w *Watcher) loop() {
 			w.events <- pending
 			pending = ""
 			timerC = nil
-		case err, ok := <-w.fs.Errors:
+		case err, ok := <-w.src.Errors():
 			if !ok {
 				return
 			}
@@ -222,22 +247,30 @@ func (w *Watcher) matches(p string) bool {
 	return w.exts[filepath.Ext(p)]
 }
 
-// excluded reports whether a path is covered by an exclude rule. Rules are
-// either directory names ("vendor") or suffix patterns ("_test.go").
+// excluded reports whether a path is covered by an exclude rule. Rule forms:
+//   "**/*suffix"  — suffix glob (e.g. "**/*_test.go")
+//   "_suffix"     — bare suffix pattern (e.g. "_test.go"; anything starting
+//                   with "_" is treated as a filename suffix)
+//   otherwise     — directory name (e.g. "vendor", ".git", "node_modules")
 func (w *Watcher) excluded(p string) bool {
 	for _, e := range w.excludes {
-		if strings.HasPrefix(e, "**/*") {
+		switch {
+		case strings.HasPrefix(e, "**/*"):
 			if strings.HasSuffix(p, strings.TrimPrefix(e, "**/*")) {
 				return true
 			}
-			continue
-		}
-		if strings.HasSuffix(p, string(filepath.Separator)+e) {
-			return true
-		}
-		for _, part := range strings.Split(p, string(filepath.Separator)) {
-			if part == e {
+		case strings.HasPrefix(e, "_"):
+			if strings.HasSuffix(p, e) {
 				return true
+			}
+		default:
+			if strings.HasSuffix(p, string(filepath.Separator)+e) {
+				return true
+			}
+			for _, part := range strings.Split(p, string(filepath.Separator)) {
+				if part == e {
+					return true
+				}
 			}
 		}
 	}

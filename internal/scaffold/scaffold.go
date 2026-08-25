@@ -101,19 +101,59 @@ func Create(target, tmpl, module string, force bool) error {
 
 // safePath rejects targets outside the user's home or /tmp (Security condition:
 // `o+ new /etc/whatever` must not be able to clobber system paths).
+//
+// Symlink-aware (Security finding, 2026-08-25): filepath.Abs does NOT resolve
+// symlinks, so a path like ~/link-to-etc/sub would previously pass the naive
+// prefix check while writing to /etc/sub. We resolve the deepest existing
+// ancestor of the target and compare RESOLVED paths, so a symlinked parent
+// redirecting outside home/tmp is rejected.
 func safePath(target string) error {
 	abs, err := filepath.Abs(target)
 	if err != nil {
 		return err
 	}
 	home, err := os.UserHomeDir()
-	if err == nil {
-		if rel, err := filepath.Rel(home, abs); err == nil && !strings.HasPrefix(rel, "..") {
-			return nil
-		}
+	if err != nil {
+		return err
 	}
-	if rel, err := filepath.Rel(os.TempDir(), abs); err == nil && !strings.HasPrefix(rel, "..") {
+	resolvedHome := resolve(home)
+	resolvedTmp := resolve(os.TempDir())
+
+	ancestor := abs
+	for {
+		if _, err := os.Lstat(ancestor); err == nil {
+			break
+		}
+		parent := filepath.Dir(ancestor)
+		if parent == ancestor {
+			return fmt.Errorf("cannot resolve target path: %s", abs)
+		}
+		ancestor = parent
+	}
+	resolved, err := filepath.EvalSymlinks(ancestor)
+	if err != nil {
+		return fmt.Errorf("cannot resolve symlinks in %s: %v", abs, err)
+	}
+	if within(resolved, resolvedHome) || within(resolved, resolvedTmp) {
 		return nil
 	}
 	return fmt.Errorf("refusing to scaffold outside home or %s without --force: %s", os.TempDir(), abs)
+}
+
+// resolve follows symlinks; on failure returns the path unchanged.
+func resolve(p string) string {
+	r, err := filepath.EvalSymlinks(p)
+	if err != nil {
+		return p
+	}
+	return r
+}
+
+// within reports whether p is inside root (or equals it).
+func within(p, root string) bool {
+	rel, err := filepath.Rel(root, p)
+	if err != nil {
+		return false
+	}
+	return rel == "." || (rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)))
 }

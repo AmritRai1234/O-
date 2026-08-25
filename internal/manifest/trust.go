@@ -54,7 +54,21 @@ func loadTrust() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	data, err := os.ReadFile(filepath.Join(cd, "trust.json"))
+	p := filepath.Join(cd, "trust.json")
+	// Trust-gate DoS guard (Security finding, 2026-08-25): a symlinked
+	// trust.json (e.g. -> /dev/random) would block os.ReadFile forever. Lstat
+	// rejects symlinks outright; an oversized file is treated as corrupt.
+	fi, err := os.Lstat(p)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return map[string]string{}, nil
+		}
+		return nil, err
+	}
+	if fi.Mode()&os.ModeSymlink != 0 || fi.Size() > 1<<20 {
+		return map[string]string{}, nil
+	}
+	data, err := os.ReadFile(p)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return map[string]string{}, nil

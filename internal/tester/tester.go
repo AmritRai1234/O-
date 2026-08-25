@@ -101,7 +101,12 @@ func runOnce(dir string, tags []string) int {
 }
 
 func handleEvent(ev TestEvent, states map[string]*testState, mu *sync.Mutex) {
-	key := ev.Package + "/" + ev.Test
+	// Package-level events (Test == "") key under the bare package name so the
+	// summary can tell package failures apart from test failures.
+	key := ev.Package
+	if ev.Test != "" {
+		key += "/" + ev.Test
+	}
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -153,7 +158,8 @@ func handleEvent(ev TestEvent, states map[string]*testState, mu *sync.Mutex) {
 	}
 }
 
-func printSummary(states map[string]*testState) {
+// summaryLine computes the result line; split out for unit testing.
+func summaryLine(states map[string]*testState) (string, int) {
 	total, fails := 0, 0
 	for _, st := range states {
 		if st.result == "" {
@@ -164,7 +170,11 @@ func printSummary(states map[string]*testState) {
 			fails++
 		}
 	}
-	line := fmt.Sprintf("o+ test: %d tests, %d failed", total, fails)
+	return fmt.Sprintf("o+ test: %d tests, %d failed", total, fails), fails
+}
+
+func printSummary(states map[string]*testState) {
+	line, fails := summaryLine(states)
 	if fails > 0 {
 		red.Println(line)
 	} else {

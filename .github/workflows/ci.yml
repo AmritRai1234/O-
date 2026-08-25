@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        # oldest supported + current stable (ledger: bump with x/sys hard trigger)
+        go: ["1.24.x", "1.26.x"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+      - name: vet
+        run: go vet ./...
+      - name: test (unit + integration, race detector)
+        run: go test -race -tags integration -count=1 ./...
+      - name: vulnerability scan
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.x"
+      - name: security-path coverage
+        run: go test -cover ./internal/manifest/ ./internal/builder/ ./internal/runner/ ./internal/watcher/ ./internal/scaffold/ ./internal/tester/

@@ -1,0 +1,19 @@
+{
+  "review_path": "/home/amritrai/spine/O+/reviews/performance-testplan.md",
+  "verdicts": {
+    "architect": "APPROVE-WITH-CONDITIONS",
+    "builder": "REJECT"
+  },
+  "key_numbers": [
+    "CI wall-clock Architect: ~66s (2×1.24.4+1.25rc1 parallel)",
+    "CI wall-clock Builder: ~45s (1×1.24.4 single cell)",
+    "sourceHash O(N): 10k files → ~200ms, 100k files → ~2s every build even cache hit",
+    "-race cost: +3s real (not Builder's claimed 2×=90s — factually wrong)",
+    "Flake: Architect ~1% (fixable to 0.5%), Builder ~0.01% but untested timer.Reset/Setpgid/SIGKILL",
+    "Coverage grep cost: ~1s — trivial for verifiable security coverage",
+    "Matrix delta: +21s/run for 1.25rc1 regression detection",
+    "pollLoop CPU spiral at 100k files: 100% core, no back-pressure",
+    "Builder gaps: 3 untested goroutine surfaces, no watcher-loop tests (timer.Reset deadlock risk pre-1.24), unverified Setpgid failure mode",
+    "Govulncheck cold: ~15s; Architect adds grep -v windows filter (defensive), Builder omits (may break CI)"
+  ]
+}

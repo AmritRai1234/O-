@@ -20,4 +20,4 @@
 - REJECTED for this epic: o+ bundle (stays v0.2), macOS/Windows, plugins, telemetry, daemon mode.
 - SUCCESS CRITERIA: `go test ./...` green with the security paths covered; CI green on main; release binary + .sha256 published.
 
-Status: ruling issued; war room may draft the HOW on user go-ahead.
+Status: COMPLETED 2026-08-25. All success criteria met: go test ./... green (unit + integration, race detector), CI workflow committed, release workflow with .sha256 committed. Coverage: manifest 83.8%, scaffold 78.9%, builder 57.4%, watcher 42.9%, tester 43.5% (+ runner process-group paths via integration suite). Bonus: the test-plan security review caught and fixed 3 real v0.1 bugs (safePath symlink bypass, LD_PRELOAD injection, trust.json symlink DoS) plus 2 test-caught bugs (exclude semantics, Exited channel drain). Ledgered in DECISION.md. Next epic decision belongs to the CEO loop (cron, daily 09:00; gateway must be running).
