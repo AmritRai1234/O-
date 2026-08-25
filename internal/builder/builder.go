@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/amritrai/o-/internal/bundle"
 	"github.com/amritrai/o-/internal/manifest"
 )
 
@@ -64,6 +65,14 @@ func (b *Builder) projectKey() (string, error) {
 // Cache hit: verified artifact returned without invoking go build.
 // Cache miss: go build into the cache, hash recorded, LRU pruned.
 func (b *Builder) Build() (string, error) {
+	// Regenerate the embedded asset set before building if it's stale. The
+	// generated file lives at the project root, so its .go changes flow into
+	// sourceHash (cache key) and the watcher automatically.
+	if res, err := bundle.Ensure(b.Dir, b.Manifest); err != nil {
+		return "", err
+	} else if res.Generated {
+		fmt.Fprintf(os.Stderr, "o- bundle: regenerated %d files (%d bytes)\n", res.Files, res.Size)
+	}
 	key, err := b.projectKey()
 	if err != nil {
 		return "", err

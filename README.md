@@ -12,6 +12,7 @@ first.**
     o- build        static binary out (thin sha256-verified cache over $GOCACHE)
     o- test         friendly UI over `go test -json`, --watch mode
     o- new          scaffold (templates: minimal, web-server, cli)
+    o- bundle       embed declared assets into the binary (go:embed generation)
 
 ## Quickstart
 
@@ -19,6 +20,25 @@ first.**
     cd myapp
     o- run          # edit code, watch it restart in ~250ms
     o- build        # ./dist/myapp
+
+## Bundling assets
+
+Declare assets in o-.yaml and they ride inside the static binary:
+
+    bundle:
+      include:
+        - templates/**/*
+        - config/*.yaml
+      exclude:          # optional; secrets are always excluded by default
+        - templates/secret.html
+      # max_size: 52428800   # optional cap (default 50MB)
+
+`o- bundle` (or `o- build`/`o- run` automatically) generates `o-bundle.gen.go`
+at the project root exposing `BundleFS embed.FS` and a `BundleHash` constant.
+Read assets at runtime with `fs.ReadFile(BundleFS, "templates/x.html")`.
+Editing an asset triggers re-bundle + hot reload in `o- run`. Mandatory
+default excludes: .env, *.pem, *.key, *.p12, *.pfx, secrets/, plus .git,
+node_modules, dist, vendor, .o-, .cache.
 
 ## Manifest (o-.yaml)
 

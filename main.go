@@ -21,6 +21,7 @@ func main() {
 		cli.NewBuildCmd(),
 		cli.NewTestCmd(),
 		cli.NewNewCmd(),
+		cli.NewBundleCmd(),
 	)
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, "o-:", err)

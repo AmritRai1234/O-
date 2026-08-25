@@ -145,5 +145,13 @@ func watchPatterns(m *manifest.Manifest) []string {
 	if len(m.Run.Watch) > 0 {
 		return m.Run.Watch
 	}
-	return []string{"./**/*.go", "./**/*.yaml", "./**/*.html"}
+	// Default watch set: Go sources + manifests + common bundled asset
+	// extensions, so editing an embedded asset triggers rebuild + re-bundle
+	// (Performance condition: no stale binary on asset edits).
+	return []string{
+		"./**/*.go", "./**/*.yaml", "./**/*.html",
+		"./**/*.css", "./**/*.js", "./**/*.png", "./**/*.jpg", "./**/*.jpeg",
+		"./**/*.gif", "./**/*.svg", "./**/*.wasm", "./**/*.woff", "./**/*.woff2",
+		"./**/*.ico", "./**/*.webp", "./**/*.mp4", "./**/*.webm", "./**/*.tmpl",
+	}
 }

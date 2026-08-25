@@ -1,23 +1,17 @@
-# NEXT-EPIC.md — CEO Loop Log, 2026-08-25
+# NEXT-EPIC.md — CEO Loop Log, 2026-08-25 (2)
 
-## STATUS REPORT (v0.1, from verification evidence)
+## STATUS REPORT (rename epic, from verification evidence)
 
-- Shipped: commit e32e8df, ~1,700 LOC Go, 4 commands (run/build/test/new)
-- Verified:
-  - go build OK, go vet OK
-  - smoke: o+ new -> o+ build (5.3 MiB in 2.3s) -> o+ test (exit 0)
-  - hot reload: edit served as v2 in 261ms restart
-  - graceful shutdown: SIGINT stops child group, port freed, zero strays
-  - trust gate: refused without --trust (fingerprint shown), recorded with --trust, trusted on re-run
-- Ledger additions: GO-2026-5024 accepted with hard trigger (Windows), cache-key correctness fix, scaffold path safety
-- OPEN GAP: zero tests for o+ itself. No CI. No checksummed releases.
+- Renamed O+ -> O- end-to-end: binary (bin/o-), command (o- run/build/test/new), manifest (o-.yaml), cache dir (~/.cache/o-), module (github.com/amritrai/o-), watcher excludes, templates, CI/release artifacts.
+- Verified: vet + tests green on Go 1.24.4 and 1.26.7 (race + integration); live smoke (scaffold o-.yaml, reload, graceful stop); CI green on 9183de1; release v0.1.1 with o- + o-.sha256 assets (verified via API).
+- Ledger note: a sed footgun (o\+ quantifier) mangled every 'o' run; recovered via git checkout and redone with literal-sed. Historical docs keep the o+ name as the record of that era.
 
-## CEO RULING — NEXT EPIC: "Trustworthy O+"
+## CEO RULING — NEXT EPIC: "o- bundle"
 
-- WHAT: (1) a test suite for the security-critical paths — manifest bomb/alias/depth guards, cache sha256 verification, trust gate, watcher exclusions + debounce, runner process-group stop, scaffold path safety; (2) CI on GitHub Actions: build + vet + test + govulncheck on every push/PR; (3) release artifact with .sha256 checksums.
-- WHY: Quality #1 is "correct, tested, no known-broken ships." A toolchain that wraps `go test` but has no tests of its own is a gap, not a finish. Safety #2: distribution must be verifiable — no curl|sh.
-- VALUES: Quality (1) and Safety (2) dominate; Simplicity (4) constrains scope.
-- REJECTED for this epic: o+ bundle (stays v0.2), macOS/Windows, plugins, telemetry, daemon mode.
-- SUCCESS CRITERIA: `go test ./...` green with the security paths covered; CI green on main; release binary + .sha256 published.
+- WHAT: `o- bundle` — the one-command asset story for single-binary Go apps. Declared assets (o-.yaml: `bundle.include` globs) become embedded in the binary at build time, so a developer ships one static binary with templates/images/config — no hand-written go:embed directives per file, no external files at runtime. Exact mechanism (generate a go:embed source file vs append a zip payload vs build-tag asset dir) is the war room's HOW decision.
+- WHY: v0.1 deferred bundle because scope was unclear; it is now the single biggest DX gap vs "feels like Bun" — Bun bundles your assets for you, Go makes you wire go:embed by hand. Ease of use (#3) is the dominant value for this epic.
+- VALUES: Ease of use (3) dominant; Simplicity (4) constrains scope (no plugin system, no remote asset fetching, no WASM); Quality (1) means the embedded asset set is hash-verified and deterministic.
+- REJECTED for this epic: remote/template registries, asset minification, WASM, plugin loaders, anything beyond "assets in, static binary out".
+- SUCCESS CRITERIA: `o- bundle` turns o-.yaml-declared assets into a working embedded build (served/readable at runtime); deterministic output (same inputs -> same binary); tests + CI green; documented in README.
 
-Status: COMPLETED 2026-08-25. All success criteria met: go test ./... green (unit + integration, race detector), CI workflow committed, release workflow with .sha256 committed. Coverage: manifest 83.8%, scaffold 78.9%, builder 57.4%, watcher 42.9%, tester 43.5% (+ runner process-group paths via integration suite). Bonus: the test-plan security review caught and fixed 3 real v0.1 bugs (safePath symlink bypass, LD_PRELOAD injection, trust.json symlink DoS) plus 2 test-caught bugs (exclude semantics, Exited channel drain). Ledgered in DECISION.md. Next epic decision belongs to the CEO loop (cron, daily 09:00; gateway must be running).
+Status: COMPLETED 2026-08-25. All success criteria met: o- bundle turns o-.yaml-declared assets into a working embedded build (e2e + live smoke verified: binary serves embedded asset, asset edit hot-reloads in 208ms); deterministic output (sorted walk, content-only hash, byte-identical regeneration); tests + CI green on Go 1.24/1.26; README documented. v0.2.0 released with checksums. Next epic decision belongs to the CEO loop (cron, daily 09:00; gateway must be running).

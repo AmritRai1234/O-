@@ -35,6 +35,12 @@ type Test struct {
 	Timeout string   `yaml:"timeout"`
 }
 
+type Bundle struct {
+	Include []string `yaml:"include"`
+	Exclude []string `yaml:"exclude"`
+	MaxSize int64    `yaml:"max_size"`
+}
+
 type Manifest struct {
 	Name    string `yaml:"name"`
 	Version string `yaml:"version"`
@@ -42,6 +48,7 @@ type Manifest struct {
 	Build   Build  `yaml:"build"`
 	Run     Run    `yaml:"run"`
 	Test    Test   `yaml:"test"`
+	Bundle  Bundle `yaml:"bundle"`
 }
 
 // Default returns the zero-config manifest for a directory.
