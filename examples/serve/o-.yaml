@@ -1,0 +1,16 @@
+name: serve
+version: "0.1.0"
+type: app
+
+run:
+  watch:
+    - ./**/*.go
+  exclude:
+    - ./**/*_test.go
+
+build:
+  output: ./dist/serve
+
+bundle:
+  include:
+    - templates/**/*

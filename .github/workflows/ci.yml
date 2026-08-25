@@ -34,3 +34,13 @@ jobs:
           go-version: "1.24.x"
       - name: security-path coverage
         run: go test -cover ./internal/manifest/ ./internal/builder/ ./internal/runner/ ./internal/watcher/ ./internal/scaffold/ ./internal/tester/
+
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.x"
+      - name: demo app tests (examples/serve)
+        run: cd examples/serve && go test -count=1 ./...

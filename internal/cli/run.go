@@ -20,17 +20,17 @@ import (
 func NewRunCmd() *cobra.Command {
 	var trust bool
 	cmd := &cobra.Command{
-		Use:   "run",
+		Use:   "run [-- args...]",
 		Short: "Run the app with hot reload",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return run(trust)
+			return run(trust, args)
 		},
 	}
 	cmd.Flags().BoolVar(&trust, "trust", false, "trust this project (required when the manifest defines pre_run hooks)")
 	return cmd
 }
 
-func run(trust bool) error {
+func run(trust bool, appArgs []string) error {
 	dir, err := os.Getwd()
 	if err != nil {
 		return err
@@ -89,7 +89,7 @@ func run(trust bool) error {
 	if err != nil {
 		return err
 	}
-	current, err := runner.Start(bin, dir)
+	current, err := runner.StartArgs(bin, appArgs, dir)
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func run(trust bool) error {
 					color.Yellow("o- run: %v", err)
 				}
 			}
-			current, err = runner.Start(newBin, dir)
+			current, err = runner.StartArgs(newBin, appArgs, dir)
 			if err != nil {
 				return err
 			}
