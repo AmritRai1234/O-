@@ -22,7 +22,7 @@ func deepYAML(levels int) string {
 func writeManifest(t *testing.T, content string) string {
 	t.Helper()
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "o+.yaml"), []byte(content), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "o-.yaml"), []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	return dir
@@ -31,7 +31,7 @@ func writeManifest(t *testing.T, content string) string {
 func TestLoad_SizeLimit(t *testing.T) {
 	dir := t.TempDir()
 	big := strings.Repeat("# comment\n", (1<<20)/10+10) // > 1MB
-	if err := os.WriteFile(filepath.Join(dir, "o+.yaml"), []byte(big), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "o-.yaml"), []byte(big), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	_, err := Load(dir)

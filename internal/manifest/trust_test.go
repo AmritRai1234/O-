@@ -16,7 +16,7 @@ func setCacheDir(t *testing.T) string {
 
 func TestFingerprint_Stable(t *testing.T) {
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "o+.yaml"), []byte("name: a\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "o-.yaml"), []byte("name: a\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module a\n"), 0o644); err != nil {
@@ -72,7 +72,7 @@ func TestFingerprint_MissingFiles(t *testing.T) {
 func TestTrust_RoundTrip(t *testing.T) {
 	setCacheDir(t)
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "o+.yaml"), []byte("name: t\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "o-.yaml"), []byte("name: t\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if ok, _ := Trusted(dir); ok {
@@ -113,7 +113,7 @@ func TestTrust_CorruptJSON(t *testing.T) {
 	if _, err := CacheDir(); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(cd, "o+", "trust.json"), []byte("{not json"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(cd, "o-", "trust.json"), []byte("{not json"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	dir := t.TempDir()
@@ -136,7 +136,7 @@ func TestTrust_SymlinkRejected(t *testing.T) {
 	if err := os.WriteFile(target, []byte(`{"dirs":{}}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.Symlink(target, filepath.Join(cd, "o+", "trust.json")); err != nil {
+	if err := os.Symlink(target, filepath.Join(cd, "o-", "trust.json")); err != nil {
 		t.Fatal(err)
 	}
 	dir := t.TempDir()
@@ -172,7 +172,7 @@ func TestCacheDir_FallbackToHome(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := filepath.Join(home, ".cache", "o+")
+	want := filepath.Join(home, ".cache", "o-")
 	if d != want {
 		t.Errorf("CacheDir = %q, want %q", d, want)
 	}

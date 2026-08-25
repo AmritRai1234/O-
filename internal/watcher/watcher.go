@@ -13,7 +13,7 @@ import (
 )
 
 // DefaultExcludes are always ignored (decision: aggressive defaults).
-var DefaultExcludes = []string{".git", "vendor", "dist", "node_modules", ".o+", ".cache"}
+var DefaultExcludes = []string{".git", "vendor", "dist", "node_modules", ".o-", ".cache"}
 
 const (
 	pollInterval = 500 * time.Millisecond
@@ -65,7 +65,7 @@ func New(root string, watchPatterns, extraExcludes []string, debounce time.Durat
 		done:     make(chan struct{}),
 	}
 	if runtime.GOOS == "linux" && w.wouldExceedInotify(root) {
-		fmt.Fprintf(os.Stderr, "o+: inotify watch limit would be exceeded — falling back to polling (%s)\n", pollInterval)
+		fmt.Fprintf(os.Stderr, "o-: inotify watch limit would be exceeded — falling back to polling (%s)\n", pollInterval)
 		w.polling = true
 		go w.pollLoop()
 		return w, nil
@@ -182,7 +182,7 @@ func (w *Watcher) loop() {
 			if !ok {
 				return
 			}
-			fmt.Fprintf(os.Stderr, "o+: watcher error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "o-: watcher error: %v\n", err)
 		}
 	}
 }

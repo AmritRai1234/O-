@@ -1,6 +1,6 @@
 # {{NAME}}
 
-Scaffolded with o+ (web-server template). Serves HTTP on $PORT (default 8080).
+Scaffolded with o- (web-server template). Serves HTTP on $PORT (default 8080).
 
-    o+ run
+    o- run
     curl localhost:8080

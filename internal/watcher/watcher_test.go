@@ -125,7 +125,7 @@ func TestExcluded(t *testing.T) {
 		{"/proj/vendor/x/y.go", true},
 		{"/proj/dist/app", true},
 		{"/proj/node_modules/a.js", true},
-		{"/proj/.o+/tmp", true},
+		{"/proj/.o-/tmp", true},
 		{"/proj/.cache/x", true},
 		{"/proj/main_test.go", true},
 		{"/proj/src/main.go", false},

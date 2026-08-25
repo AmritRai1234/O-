@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/amritrai/oplus/internal/manifest"
+	"github.com/amritrai/o-/internal/manifest"
 )
 
 func hexSum(data []byte) string {

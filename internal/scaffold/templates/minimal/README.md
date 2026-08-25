@@ -1,11 +1,11 @@
 # {{NAME}}
 
-Scaffolded with o+ (minimal template).
+Scaffolded with o- (minimal template).
 
 ## Run with hot reload
 
-    o+ run
+    o- run
 
 ## Build a static binary
 
-    o+ build
+    o- build

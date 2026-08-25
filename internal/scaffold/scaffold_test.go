@@ -19,7 +19,7 @@ func TestSafePath_HomeOK(t *testing.T) {
 }
 
 func TestSafePath_TmpOK(t *testing.T) {
-	if err := safePath(filepath.Join(os.TempDir(), "o+test", "myapp")); err != nil {
+	if err := safePath(filepath.Join(os.TempDir(), "o-test", "myapp")); err != nil {
 		t.Errorf("path under /tmp must be allowed: %v", err)
 	}
 }
@@ -78,7 +78,7 @@ func TestCreate_ScaffoldsMinimal(t *testing.T) {
 	if err := Create(target, "minimal", "example.com/myapp", false); err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"main.go", "o+.yaml", "README.md", "go.mod"} {
+	for _, want := range []string{"main.go", "o-.yaml", "README.md", "go.mod"} {
 		if _, err := os.Stat(filepath.Join(target, want)); err != nil {
 			t.Errorf("missing scaffolded file %s: %v", want, err)
 		}
@@ -90,7 +90,7 @@ func TestCreate_ScaffoldsMinimal(t *testing.T) {
 	if !strings.Contains(string(gomod), "module example.com/myapp") {
 		t.Errorf("go.mod missing module line: %s", gomod)
 	}
-	manifestData, err := os.ReadFile(filepath.Join(target, "o+.yaml"))
+	manifestData, err := os.ReadFile(filepath.Join(target, "o-.yaml"))
 	if err != nil {
 		t.Fatal(err)
 	}

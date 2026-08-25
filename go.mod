@@ -1,4 +1,4 @@
-module github.com/amritrai/oplus
+module github.com/amritrai/o-
 
 go 1.24.4
 

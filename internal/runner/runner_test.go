@@ -10,7 +10,7 @@ func TestSanitizeEnv_DropsSecretsAndInjections(t *testing.T) {
 		"PATH=/usr/bin",
 		"HOME=/home/x",
 		"O+_INTERNAL=secret",
-		"O+_CACHE=/tmp/o+",
+		"O+_CACHE=/tmp/o-",
 		"LD_PRELOAD=/tmp/evil.so",
 		"LD_LIBRARY_PATH=/tmp/evil",
 	}

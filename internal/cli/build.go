@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/amritrai/oplus/internal/builder"
-	"github.com/amritrai/oplus/internal/manifest"
+	"github.com/amritrai/o-/internal/builder"
+	"github.com/amritrai/o-/internal/manifest"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -64,7 +64,7 @@ func build(output string) error {
 	if err != nil {
 		return err
 	}
-	color.Green("o+ build: %s (%s) in %s", out, humanSize(info.Size()), time.Since(start).Round(time.Millisecond))
+	color.Green("o- build: %s (%s) in %s", out, humanSize(info.Size()), time.Since(start).Round(time.Millisecond))
 	return nil
 }
 

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/amritrai/oplus/internal/watcher"
+	"github.com/amritrai/o-/internal/watcher"
 	"github.com/fatih/color"
 )
 
@@ -48,7 +48,7 @@ func Run(dir string, tags []string, watch bool) error {
 			return nil
 		}
 		fmt.Println()
-		cyan.Println("o+ test: watching for changes (ctrl-c to stop)...")
+		cyan.Println("o- test: watching for changes (ctrl-c to stop)...")
 		w, err := watcher.New(dir, []string{"./**/*.go"}, []string{"_test.go"}, 200*time.Millisecond)
 		if err != nil {
 			return err
@@ -70,11 +70,11 @@ func runOnce(dir string, tags []string) int {
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		red.Println("o+ test:", err)
+		red.Println("o- test:", err)
 		return 1
 	}
 	if err := cmd.Start(); err != nil {
-		red.Println("o+ test:", err)
+		red.Println("o- test:", err)
 		return 1
 	}
 
@@ -170,7 +170,7 @@ func summaryLine(states map[string]*testState) (string, int) {
 			fails++
 		}
 	}
-	return fmt.Sprintf("o+ test: %d tests, %d failed", total, fails), fails
+	return fmt.Sprintf("o- test: %d tests, %d failed", total, fails), fails
 }
 
 func printSummary(states map[string]*testState) {

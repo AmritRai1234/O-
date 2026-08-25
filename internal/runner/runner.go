@@ -50,7 +50,7 @@ func StartArgs(bin string, args []string, dir string) (*Runner, error) {
 	return r, nil
 }
 
-// sanitizeEnv drops o+ internal variables AND shared-library injection vectors
+// sanitizeEnv drops o- internal variables AND shared-library injection vectors
 // (Security finding, 2026-08-25): LD_PRELOAD / LD_LIBRARY_PATH inherited from
 // the invoking shell would let a hostile repo's hooks preload arbitrary .so
 // into the developer's app. macOS DYLD_* equivalents are added with the macOS

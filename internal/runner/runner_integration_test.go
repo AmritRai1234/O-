@@ -19,7 +19,7 @@ import (
 var helperPath string
 
 func TestMain(m *testing.M) {
-	dir, err := os.MkdirTemp("", "o+helper")
+	dir, err := os.MkdirTemp("", "o-helper")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "TestMain:", err)
 		os.Exit(1)

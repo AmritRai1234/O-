@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 )
 
-// Fingerprint hashes the project trust surface: o+.yaml + go.mod + go.sum.
+// Fingerprint hashes the project trust surface: o-.yaml + go.mod + go.sum.
 // Used both for the --trust model (Security condition) and the build cache key.
 func Fingerprint(dir string) (string, error) {
 	h := sha256.New()
-	for _, name := range []string{"o+.yaml", "go.mod", "go.sum"} {
+	for _, name := range []string{"o-.yaml", "go.mod", "go.sum"} {
 		data, err := os.ReadFile(filepath.Join(dir, name))
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -27,7 +27,7 @@ func Fingerprint(dir string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-// CacheDir returns $XDG_CACHE_HOME/o+ (or ~/.cache/o+), created with mode 0700
+// CacheDir returns $XDG_CACHE_HOME/o- (or ~/.cache/o-), created with mode 0700
 // (Security condition: no world-readable build artifacts).
 func CacheDir() (string, error) {
 	base := os.Getenv("XDG_CACHE_HOME")
@@ -38,7 +38,7 @@ func CacheDir() (string, error) {
 		}
 		base = filepath.Join(home, ".cache")
 	}
-	d := filepath.Join(base, "o+")
+	d := filepath.Join(base, "o-")
 	if err := os.MkdirAll(d, 0o700); err != nil {
 		return "", err
 	}

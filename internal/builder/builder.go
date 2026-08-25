@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/amritrai/oplus/internal/manifest"
+	"github.com/amritrai/o-/internal/manifest"
 )
 
 const maxArtifacts = 100 // Performance condition: LRU >= 100, not 10.
@@ -130,7 +130,7 @@ func (b *Builder) verifyCached(bin, sumFile string) bool {
 	if strings.TrimSpace(string(want)) != got {
 		os.Remove(bin)
 		os.Remove(sumFile)
-		fmt.Fprintf(os.Stderr, "o+: cached artifact failed sha256 check — rebuilt\n")
+		fmt.Fprintf(os.Stderr, "o-: cached artifact failed sha256 check — rebuilt\n")
 		return false
 	}
 	return true
@@ -172,7 +172,7 @@ func (b *Builder) prune() {
 // churn the app artifact.
 func sourceHash(root string) (string, error) {
 	h := sha256.New()
-	excludedDirs := map[string]bool{".git": true, "vendor": true, "dist": true, "node_modules": true, ".o+": true, ".cache": true}
+	excludedDirs := map[string]bool{".git": true, "vendor": true, "dist": true, "node_modules": true, ".o-": true, ".cache": true}
 	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return nil // unreadable subtree: skip rather than fail the build

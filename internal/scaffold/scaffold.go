@@ -22,7 +22,7 @@ type Template struct {
 // List returns the available templates.
 func List() []Template {
 	return []Template{
-		{"minimal", "bare main.go + o+.yaml"},
+		{"minimal", "bare main.go + o-.yaml"},
 		{"web-server", "net/http server with PORT env"},
 		{"cli", "flag-based CLI entry point"},
 	}
@@ -100,7 +100,7 @@ func Create(target, tmpl, module string, force bool) error {
 }
 
 // safePath rejects targets outside the user's home or /tmp (Security condition:
-// `o+ new /etc/whatever` must not be able to clobber system paths).
+// `o- new /etc/whatever` must not be able to clobber system paths).
 //
 // Symlink-aware (Security finding, 2026-08-25): filepath.Abs does NOT resolve
 // symlinks, so a path like ~/link-to-etc/sub would previously pass the naive

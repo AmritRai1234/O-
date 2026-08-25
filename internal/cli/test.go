@@ -3,8 +3,8 @@ package cli
 import (
 	"os"
 
-	"github.com/amritrai/oplus/internal/manifest"
-	"github.com/amritrai/oplus/internal/tester"
+	"github.com/amritrai/o-/internal/manifest"
+	"github.com/amritrai/o-/internal/tester"
 	"github.com/spf13/cobra"
 )
 

@@ -18,10 +18,10 @@ jobs:
       - name: build + checksum (Safety #2: verifiable artifacts, no curl|sh)
         run: |
           make build
-          cd bin && sha256sum o+ > o+.sha256
+          cd bin && sha256sum o- > o-.sha256
       - name: attach to release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            bin/o+
-            bin/o+.sha256
+            bin/o-
+            bin/o-.sha256

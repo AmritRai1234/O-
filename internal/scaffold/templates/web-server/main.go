@@ -13,7 +13,7 @@ func main() {
 		port = "8080"
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "hello from o+ — {{NAME}} (web template)\n")
+		fmt.Fprintf(w, "hello from o- — {{NAME}} (web template)\n")
 	})
 	log.Printf("{{NAME}} listening on :%s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

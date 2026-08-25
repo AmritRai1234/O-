@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	// MaxManifestSize caps o+.yaml at 1MB (Security condition: no unbounded input).
+	// MaxManifestSize caps o-.yaml at 1MB (Security condition: no unbounded input).
 	MaxManifestSize = 1 << 20
 	// MaxDepth caps nesting at 64 (Security condition: resource exhaustion guard).
 	MaxDepth = 64
@@ -61,11 +61,11 @@ func (m *Manifest) fillDefaults(dir string) {
 	}
 }
 
-// Load reads and strictly parses o+.yaml in dir. Returns the default manifest
+// Load reads and strictly parses o-.yaml in dir. Returns the default manifest
 // when the file is absent. Safety: 1MB cap, nesting depth limit 64, anchors and
 // aliases forbidden (billion-laughs protection), unknown fields rejected.
 func Load(dir string) (*Manifest, error) {
-	path := filepath.Join(dir, "o+.yaml")
+	path := filepath.Join(dir, "o-.yaml")
 	data, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -74,13 +74,13 @@ func Load(dir string) (*Manifest, error) {
 		return nil, err
 	}
 	if len(data) > MaxManifestSize {
-		return nil, errors.New("o+.yaml exceeds 1MB size limit")
+		return nil, errors.New("o-.yaml exceeds 1MB size limit")
 	}
 
 	// Pass 1: parse to a node tree for safety checks (no alias expansion here).
 	var root yaml.Node
 	if err := yaml.Unmarshal(data, &root); err != nil {
-		return nil, fmt.Errorf("invalid o+.yaml: %w", err)
+		return nil, fmt.Errorf("invalid o-.yaml: %w", err)
 	}
 	if err := checkDepth(&root, 0); err != nil {
 		return nil, err
@@ -95,7 +95,7 @@ func Load(dir string) (*Manifest, error) {
 	dec := yaml.NewDecoder(bytes.NewReader(data))
 	dec.KnownFields(true)
 	if err := dec.Decode(&m); err != nil {
-		return nil, fmt.Errorf("invalid o+.yaml: %w", err)
+		return nil, fmt.Errorf("invalid o-.yaml: %w", err)
 	}
 	m.fillDefaults(dir)
 	return &m, nil
@@ -103,7 +103,7 @@ func Load(dir string) (*Manifest, error) {
 
 func checkDepth(n *yaml.Node, depth int) error {
 	if depth > MaxDepth {
-		return fmt.Errorf("o+.yaml nesting exceeds depth limit %d", MaxDepth)
+		return fmt.Errorf("o-.yaml nesting exceeds depth limit %d", MaxDepth)
 	}
 	for _, c := range n.Content {
 		if err := checkDepth(c, depth+1); err != nil {
@@ -115,7 +115,7 @@ func checkDepth(n *yaml.Node, depth int) error {
 
 func rejectAliases(n *yaml.Node) error {
 	if n.Kind == yaml.AliasNode {
-		return errors.New("o+.yaml anchors/aliases are forbidden")
+		return errors.New("o-.yaml anchors/aliases are forbidden")
 	}
 	for _, c := range n.Content {
 		if err := rejectAliases(c); err != nil {

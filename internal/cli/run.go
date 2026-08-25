@@ -9,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/amritrai/oplus/internal/builder"
-	"github.com/amritrai/oplus/internal/manifest"
-	"github.com/amritrai/oplus/internal/runner"
-	"github.com/amritrai/oplus/internal/watcher"
+	"github.com/amritrai/o-/internal/builder"
+	"github.com/amritrai/o-/internal/manifest"
+	"github.com/amritrai/o-/internal/runner"
+	"github.com/amritrai/o-/internal/watcher"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -68,7 +68,7 @@ func run(trust bool) error {
 		c.Stdin = os.Stdin
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
-		color.Cyan("o+ run: pre_run %s", h)
+		color.Cyan("o- run: pre_run %s", h)
 		if err := c.Run(); err != nil {
 			return fmt.Errorf("pre_run hook %q failed: %v", h, err)
 		}
@@ -93,7 +93,7 @@ func run(trust bool) error {
 	if err != nil {
 		return err
 	}
-	color.Green("o+ run: %s up (pid %d), watching for changes (ctrl-c to stop)", m.Name, current.PID())
+	color.Green("o- run: %s up (pid %d), watching for changes (ctrl-c to stop)", m.Name, current.PID())
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
@@ -109,26 +109,26 @@ func run(trust bool) error {
 			if current != nil {
 				_ = current.Stop(3 * time.Second)
 			}
-			color.Yellow("o+ run: stopped")
+			color.Yellow("o- run: stopped")
 			return nil
 		case <-tick.C:
 			if current != nil && current.Exited() && !reported {
-				color.Yellow("o+ run: app exited; waiting for changes (ctrl-c to quit)")
+				color.Yellow("o- run: app exited; waiting for changes (ctrl-c to quit)")
 				reported = true
 			}
 		case <-w.Events():
-			color.Cyan("o+ run: change detected, building...")
+			color.Cyan("o- run: change detected, building...")
 			start := time.Now()
 			newBin, err := b.Build()
 			if err != nil {
 				// Compile failed: old process keeps running (decision: a broken
 				// save must never kill a working app).
-				color.Red("o+ run: build failed — keeping current process running")
+				color.Red("o- run: build failed — keeping current process running")
 				continue
 			}
 			if current != nil {
 				if err := current.Stop(3 * time.Second); err != nil {
-					color.Yellow("o+ run: %v", err)
+					color.Yellow("o- run: %v", err)
 				}
 			}
 			current, err = runner.Start(newBin, dir)
@@ -136,7 +136,7 @@ func run(trust bool) error {
 				return err
 			}
 			reported = false
-			color.Green("o+ run: restarted in %s", time.Since(start).Round(time.Millisecond))
+			color.Green("o- run: restarted in %s", time.Since(start).Round(time.Millisecond))
 		}
 	}
 }

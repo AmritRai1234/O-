@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/amritrai/oplus/internal/scaffold"
+	"github.com/amritrai/o-/internal/scaffold"
 	"github.com/spf13/cobra"
 )
 
